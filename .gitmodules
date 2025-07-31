@@ -1,3 +1,12 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/cross-chain-swap"]
+	path = lib/cross-chain-swap
+	url = https://github.com/1inch/cross-chain-swap
+[submodule "lib/limit-order-protocol"]
+	path = lib/limit-order-protocol
+	url = https://github.com/1inch/limit-order-protocol
