@@ -3,4 +3,10 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
+remappings = [
+    "@openzeppelin-contracts/contracts/=lib/openzeppelin-contracts/contracts/",
+    "cross-chain-swap=lib/cross-chain-swap/",
+    "limit-order-protocol=lib/limit-order-protocol/",
+]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
