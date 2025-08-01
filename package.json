@@ -7,5 +7,9 @@
   "scripts": {
     "maker": "npm --workspace scripts run maker",
     "relayer": "npm --workspace scripts start"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0",
+    "ethers": "^6.15.0"
   }
 }
