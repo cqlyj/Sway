@@ -65,7 +65,7 @@ module fusion_locker::shared_locker {
         // assert!(ctx.sender() == locker.resolver, E_NOT_RESOLVER);
         let now = clock::timestamp_ms(clock_obj);
         assert!(now < locker.unlock_date, E_CLAIM_TOO_EARLY);
-        assert!(hash::sha3_256(&secret) == locker.hashlock, E_HASH_MISMATCH);
+        assert!(hash::blake2b256(&secret) == locker.hashlock, E_HASH_MISMATCH);
 
         let SharedLocker { id, coin, .. } = locker;
         transfer::public_transfer(coin, receiver);
