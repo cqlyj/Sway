@@ -1,0 +1,11 @@
+{
+  "name": "fusion-crosschain-swap",
+  "private": true,
+  "workspaces": [
+    "scripts"
+  ],
+  "scripts": {
+    "maker": "npm --workspace scripts run maker",
+    "relayer": "npm --workspace scripts start"
+  }
+}
