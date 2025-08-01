@@ -12,3 +12,16 @@ docs/
 
 # Dotenv file
 .env
+
+# Additional generated folders/logs
+broadcast/
+!.gitkeep
+forge-snapshots/
+node_modules/
+cache/
+
+# Sui/Move build artifacts
+sui/**/build/
+*.mv
+Move.lock
+
