@@ -1,0 +1,16 @@
+{
+  "name": "fusion-relayer",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "relayer.ts",
+  "scripts": {
+    "start": "ts-node --esm relayer.ts"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.55.0",
+    "@noble/hashes": "^1.4.0",
+    "ethers": "^6.10.0",
+    "dotenv": "^16.3.0",
+    "ts-node": "^10.9.1"
+  }
+}
