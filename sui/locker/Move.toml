@@ -1,0 +1,10 @@
+[package]
+name = "FusionLocker"
+edition = "2024.beta"
+version = "0.0.1"
+
+[addresses]
+fusion_locker = "0x0"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet" }
