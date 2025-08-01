@@ -24,4 +24,5 @@ cache/
 sui/**/build/
 *.mv
 Move.lock
+*.key
 
