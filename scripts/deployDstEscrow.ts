@@ -91,10 +91,21 @@ async function main() {
     timelocks: timelocksU256,
   } as const;
 
+  const dstArgs = [
+    immutables.orderHash,
+    immutables.hashlock,
+    immutables.maker,
+    immutables.taker,
+    immutables.token,
+    immutables.amount,
+    immutables.safetyDeposit,
+    immutables.timelocks,
+  ] as const;
+
   // ---------------------------------------------------------------------------
   // 4. Compute deterministic escrow address (for logging & mapping)
   // ---------------------------------------------------------------------------
-  const escrowAddress: string = await factory.addressOfEscrowDst(immutables);
+  const escrowAddress: string = await factory.addressOfEscrowDst(dstArgs);
   console.log("Deterministic EscrowDst address:", escrowAddress);
 
   // ---------------------------------------------------------------------------
@@ -123,9 +134,13 @@ async function main() {
     }
   }
 
-  const tx = await factory.createDstEscrow(immutables, now + 7200, {
-    value: immutables.safetyDeposit,
-    gasLimit: 1_000_000,
+  const nativeAmount =
+    immutables.token === ethers.ZeroAddress
+      ? immutables.safetyDeposit + immutables.amount
+      : immutables.safetyDeposit;
+
+  const tx = await factory.createDstEscrow(dstArgs, now + 86_400, {
+    value: nativeAmount,
   });
   console.log("createDstEscrow tx sent: ", tx.hash);
   await tx.wait();
