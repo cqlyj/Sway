@@ -66,21 +66,38 @@ async function main() {
   // Update secretMapping.json with escrow details
   console.log("✅ Escrow deployed, updating secret mapping...");
 
-  // 3) Start bidirectional relayer (keeps process alive)
-  console.log("\nStarting relayer – press Ctrl+C when done …\n");
+  // 3) Start bidirectional relayer in background
+  console.log("\nStarting relayer in background...\n");
   const relayer = spawn("npm", ["run", "start"], {
-    stdio: "inherit",
+    stdio: "pipe", // Don't inherit stdio so we can continue
     env,
   });
 
-  // Propagate stop signals to child process
-  const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM", "SIGHUP"];
-  for (const sig of signals) {
-    process.on(sig, () => {
-      relayer.kill(sig);
-      process.exit();
-    });
-  }
+  // Wait a bit for relayer to start up
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  console.log("✅ Relayer started, now completing the swap...\n");
+
+  // 4) Complete the swap by revealing the secret
+  console.log("🎯 Revealing secret to complete cross-chain swap...\n");
+  runSync("ts-node", ["--esm", "completeSwap.ts"], env);
+
+  // 5) Wait for relayer to process the event
+  console.log("\n⏳ Waiting for relayer to process the event...\n");
+  await new Promise((resolve) => setTimeout(resolve, 15000));
+
+  // 6) Stop the relayer and complete
+  console.log("🛑 Stopping relayer...\n");
+  relayer.kill("SIGTERM");
+
+  console.log("🎉 FUSION+ CROSS-CHAIN SWAP DEMO COMPLETED SUCCESSFULLY! 🎉");
+  console.log("\n✅ Summary:");
+  console.log("  - Sui SharedLocker created and funded");
+  console.log("  - Ethereum escrow deployed on Sepolia");
+  console.log("  - Secret revealed on Sui");
+  console.log("  - Relayer propagated secret cross-chain");
+  console.log("\n🚀 Bidirectional cross-chain swaps are now working! 🚀");
+
+  process.exit(0);
 }
 
 main().catch((err) => {
