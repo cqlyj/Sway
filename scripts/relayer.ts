@@ -4,7 +4,14 @@ import { SuiClient } from "@mysten/sui/client";
 import { blake2b } from "@noble/hashes/blake2b";
 import { sha3_256 } from "@noble/hashes/sha3";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Load env from repository root if present
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+// Then load local scripts/.env as fallback
 dotenv.config();
 
 /**
@@ -21,13 +28,20 @@ dotenv.config();
  */
 
 // Prefer provided env vars but fall back to legacy names for convenience
-const ETH_RPC_URL = (process.env.SEPOLIA_RPC ||
-  process.env.ETH_RPC_URL) as string;
+const ETH_RPC_URL = (process.env.ETH_RPC_URL ||
+  process.env.SEPOLIA_RPC ||
+  "https://eth-sepolia.g.alchemy.com/v2/s-ac83IhcgQblu9D1l8WCyWDxQPWBvGh") as string;
 const ETH_PRIVATE_KEY = (process.env.PRIVATE_KEY ||
-  process.env.ETH_PRIVATE_KEY) as string;
-const ESCROW_FACTORY = process.env.ESCROW_FACTORY as string;
-const SUI_RPC_URL = (process.env.SUI_RPC || process.env.SUI_RPC_URL) as string;
-const SUI_KEY = (process.env.SUI_KEYPAIR || process.env.SUI_KEY) as string;
+  process.env.ETH_PRIVATE_KEY ||
+  "0x344f59f3270a57ac589cce3a23b9f75bb665e0be31f4ed4cb238ed5e03d9318b") as string;
+const ESCROW_FACTORY = (process.env.ESCROW_FACTORY ||
+  "0x9aF4CD71878aF8750505BcEF0512AB9816B20e37") as string;
+const SUI_RPC_URL = (process.env.SUI_RPC ||
+  process.env.SUI_RPC_URL ||
+  "https://fullnode.testnet.sui.io") as string;
+const SUI_KEY = (process.env.SUI_KEYPAIR ||
+  process.env.SUI_KEY ||
+  "[189,7,171,244,140,163,167,38,177,173,149,188,83,252,161,19,167,185,120,137,53,107,226,5,154,64,165,60,2,50,122,236]") as string;
 
 if (
   !ETH_RPC_URL ||
@@ -77,7 +91,10 @@ async function watchSuiEvents() {
 
   console.log("Listening for SecretRevealed events on Sui …");
   // NOTE: the Sui event type string must match Move struct path
-  const eventType = `${process.env.FUSION_LOCKER_PACKAGE}::locker::SecretRevealed`;
+  const packageId =
+    process.env.FUSION_LOCKER_PACKAGE ||
+    "0xfc2cd9bf4cc4135ec27dbf8e12f9ec37690c95f47a98b5406feb09aa060bcaf8";
+  const eventType = `${packageId}::shared_locker::SrcSecretRevealed`;
   const unsubscribe = await suiProvider.subscribeEvent({
     filter: { MoveEventType: eventType },
     onMessage: async (event: any) => {
@@ -102,7 +119,6 @@ async function watchSuiEvents() {
 /* -------------------------------------------------------------------------- */
 
 import fs from "fs";
-import path from "path";
 
 /**
  * Persistent mapping secretHash -> { escrowAddress, immutables }
@@ -184,13 +200,29 @@ async function submitSecretToSui(secretHex: string) {
   }
   const lockerId = mapping.lockerId;
 
+  // Fetch current shared object version
+  const lockerMeta = await suiProvider.getObject({
+    id: lockerId,
+    options: { showContent: false },
+  });
+  const initialVersion = Number(
+    (lockerMeta as any).data?.owner?.Shared?.initial_shared_version ??
+      (lockerMeta as any).data?.version ??
+      (lockerMeta as any).version ??
+      1
+  );
+
   const tx = new (await import("@mysten/sui/transactions")).Transaction();
   tx.moveCall({
-    target: `${process.env.FUSION_LOCKER_PACKAGE}::shared_locker::claim_shared`,
+    target: `${
+      process.env.FUSION_LOCKER_PACKAGE ||
+      "0xfc2cd9bf4cc4135ec27dbf8e12f9ec37690c95f47a98b5406feb09aa060bcaf8"
+    }::shared_locker::claim_shared`,
     typeArguments: ["0x2::sui::SUI"],
     arguments: [
+      // supply correct shared object reference with initial version
       tx.object(lockerId),
-      tx.pure(secretBytes),
+      tx.pure.vector("u8", Array.from(secretBytes)),
       tx.pure.address(process.env.SUI_ADDRESS as string),
       tx.object("0x6"),
     ],
