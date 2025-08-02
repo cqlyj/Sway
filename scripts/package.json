@@ -5,7 +5,8 @@
   "main": "relayer.ts",
   "scripts": {
     "start": "ts-node --esm relayer.ts",
-    "maker": "ts-node --esm maker.ts"
+    "maker": "ts-node --esm maker.ts",
+    "demo": "ts-node --esm demo.ts"
   },
   "dependencies": {
     "@mysten/sui": "^1.37.1",
