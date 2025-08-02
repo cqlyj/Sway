@@ -26,3 +26,5 @@ sui/**/build/
 Move.lock
 *.key
 
+scripts/dist/
+
