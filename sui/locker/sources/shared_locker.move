@@ -20,7 +20,7 @@ module fusion_locker::shared_locker {
 
     /// Shared locker object used when **Sui is the source chain** (maker funds)
     /// Assets are locked by the maker; resolver can claim by providing the secret.
-    public struct SharedLocker<T: key + store> has key, store {
+    public struct SharedLocker<phantom T> has key, store {
         id: UID,
         hashlock: vector<u8>,
         unlock_date: u64, // milliseconds
@@ -31,7 +31,7 @@ module fusion_locker::shared_locker {
 
     /// Maker creates a shared locker that holds their tokens.
     /// The locker is immediately shared so that the resolver can later call `claim_shared`.
-    public entry fun maker_lock<T: key + store>(
+    public entry fun maker_lock<T>(
         coins: coin::Coin<T>,
         hashlock: vector<u8>,
         duration_ms: u64,
@@ -53,7 +53,7 @@ module fusion_locker::shared_locker {
     }
 
     /// Resolver claims the funds by revealing the secret before the timelock.
-    public entry fun claim_shared<T: key + store>(
+    public entry fun claim_shared<T>(
         locker: SharedLocker<T>,
         secret: vector<u8>,
         receiver: address,
@@ -76,7 +76,7 @@ module fusion_locker::shared_locker {
     }
 
     /// Maker refunds after expiry.
-    public entry fun refund_shared<T: key + store>(
+    public entry fun refund_shared<T>(
         locker: SharedLocker<T>,
         clock_obj: &clock::Clock,
         ctx: &mut TxContext,

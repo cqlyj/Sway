@@ -18,7 +18,7 @@ module fusion_locker::locker {
     }
 
     /// Locker object holding a balance of `T` locked by hashlock+timelock
-    public struct Locker<T: key + store> has key, store {
+    public struct Locker<phantom T> has key, store {
         id: UID,
         hashlock: vector<u8>,
         unlock_date: u64, // milliseconds since epoch
@@ -27,7 +27,7 @@ module fusion_locker::locker {
     }
 
     /// Create a locker and transfer it to the resolver.
-    public entry fun lock<T: key + store>(
+    public entry fun lock<T>(
         // Coins to lock
         coins: coin::Coin<T>,
         // Hash of the secret (32 bytes preferred)
@@ -52,7 +52,7 @@ module fusion_locker::locker {
     }
 
     /// Claim locked funds by providing the secret
-    public entry fun claim<T: key + store>(
+    public entry fun claim<T>(
         locker: Locker<T>,
         secret: vector<u8>,
         receiver: address,
@@ -71,7 +71,7 @@ module fusion_locker::locker {
     }
 
     /// Refund maker after timelock expires
-    public entry fun refund<T: key + store>(
+    public entry fun refund<T>(
         locker: Locker<T>,
         clock_obj: &clock::Clock,
     ) {
